@@ -21,6 +21,7 @@ public protocol YMCalendarAppearance: class {
     func calendarViewAppearance(_ view: YMCalendarView, dayLabelBackgroundColorAtDate date: Date) -> UIColor
     func calendarViewAppearance(_ view: YMCalendarView, dayLabelSelectedTextColorAtDate date: Date) -> UIColor
     func calendarViewAppearance(_ view: YMCalendarView, dayLabelSelectedBackgroundColorAtDate date: Date) -> UIColor
+    func calendarViewAppearance(_ view: YMCalendarView, dayBackgroundColorAtDate date: Date) -> UIColor
 }
 
 extension YMCalendarAppearance {
@@ -62,5 +63,9 @@ extension YMCalendarAppearance {
     
     public func calendarViewAppearance(_ view: YMCalendarView, dayLabelSelectedBackgroundColorAtDate date: Date) -> UIColor {
         return .black
+    }
+    
+    public func calendarViewAppearance(_ view: YMCalendarView, dayBackgroundColorAtDate date: Date) -> UIColor {
+        return .white
     }
 }

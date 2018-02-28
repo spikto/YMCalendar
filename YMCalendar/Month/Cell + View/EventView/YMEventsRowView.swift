@@ -103,23 +103,24 @@ final internal class YMEventsRowView: UIScrollView, ReusableObject {
         var lines = [IndexSet]()
         
         eventRanges
-            .sorted(by: {$0.0.key.section < $0.1.key.section || $0.0.key.row < $0.1.key.row})
+            .sorted{ (first, second) -> Bool in return first.key.section < second.key.section || first.key.row < second.key.row }
             .forEach { indexPath, range in
             
                 var numLine = -1
-            
-                for i in 0..<lines.count {
-                    let indexes = lines[i]
-                    if !indexes.intersects(integersIn: range.toRange()!) {
-                        numLine = i
-                        break
+                if (range.length>0) {
+                    for i in 0..<lines.count {
+                        let indexes = lines[i]
+                        if !indexes.intersects(integersIn: Range(range)!) {
+                            numLine = i
+                            break
+                        }
                     }
-                }
-                if numLine == -1 {
-                    numLine = lines.count
-                    lines.append(IndexSet(integersIn: range.toRange()!))
-                } else {
-                    lines[numLine].insert(integersIn: range.toRange()!)
+                    if numLine == -1 {
+                        numLine = lines.count
+                        lines.append(IndexSet(integersIn: Range(range)!))
+                    } else {
+                        lines[numLine].insert(integersIn: Range(range)!)
+                    }
                 }
                 
                 if let maxVisibleEvents = maxVisibleLines {
@@ -229,7 +230,7 @@ final internal class YMEventsRowView: UIScrollView, ReusableObject {
     
     
     
-    func handleTap(_ recognizer: UITapGestureRecognizer) {
+    @objc func handleTap(_ recognizer: UITapGestureRecognizer) {
         let pt = recognizer.location(in: self)
         for (indexPath, cell) in cells {
             if cell.frame.contains(pt) {

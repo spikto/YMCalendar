@@ -81,6 +81,8 @@ final public class YMCalendarView: UIView, YMCalendarAppearance {
         }
     }
     
+    public var enableDaySelectionIndicator: Bool = true
+    
     public var allowsMultipleSelection: Bool = false
     
     public var allowsSelection: Bool = true {
@@ -95,6 +97,12 @@ final public class YMCalendarView: UIView, YMCalendarAppearance {
         }
         set {
             collectionView.isPagingEnabled = newValue
+        }
+    }
+    
+    public var scrollsToTop: Bool = false {
+        didSet {
+            collectionView.scrollsToTop = scrollsToTop
         }
     }
     
@@ -261,6 +269,7 @@ final public class YMCalendarView: UIView, YMCalendarAppearance {
         collectionView.showsVerticalScrollIndicator = false
         collectionView.showsHorizontalScrollIndicator = false
         collectionView.allowsMultipleSelection = false
+        collectionView.scrollsToTop = false
         
         collectionView.backgroundView = UIView()
         collectionView.backgroundView?.layer.insertSublayer(gradientLayer, at: 0)
@@ -408,7 +417,7 @@ extension YMCalendarView {
         
         var fontSize = font.pointSize
         for str in strings {
-            let attrStr = NSAttributedString(string: str, attributes: [NSFontAttributeName : font])
+            let attrStr = NSAttributedString(string: str, attributes: [NSAttributedStringKey.font : font])
             attrStr.boundingRect(with: size, options: NSStringDrawingOptions.usesLineFragmentOrigin, context: context)
             fontSize = min(fontSize, font.pointSize * context.actualScaleFactor)
         }
@@ -788,6 +797,7 @@ extension YMCalendarView: UICollectionViewDataSource {
         cell.dayLabelSelectedColor = appearance.calendarViewAppearance(self, dayLabelSelectedTextColorAtDate: date)
         cell.dayLabelSelectedBackgroundColor = appearance.calendarViewAppearance(self, dayLabelSelectedBackgroundColorAtDate: date)
         cell.dayLabelHeight = dayLabelHeight
+        cell.bgView.backgroundColor = appearance.calendarViewAppearance(self, dayBackgroundColorAtDate: date)
 
         // select cells which already selected dates
         selectedDates.forEach {
@@ -983,24 +993,27 @@ extension YMCalendarView: YMCalendarLayoutDelegate {
         } else {
             var needsReload = false
             
-            // deselect all selected dates
-            selectedDates.forEach {
-                if let index = indexPathForDate($0),
-                    let deselectCell = collectionView.cellForItem(at: index) as? YMMonthDayCollectionCell {
-                    deselectCell.deselect(withAnimation: deselectAnimation)
-                } else {
-                    // if collectionView couldn't find cell by cellForItem(at:_),
-                    // should reload() in completion after animation.
-                    needsReload = true
+            // if no selection indicator no need to select and deselect dayLabel
+            if (enableDaySelectionIndicator) {
+                // deselect all selected dates
+                selectedDates.forEach {
+                    if let index = indexPathForDate($0),
+                        let deselectCell = collectionView.cellForItem(at: index) as? YMMonthDayCollectionCell {
+                        deselectCell.deselect(withAnimation: deselectAnimation)
+                    } else {
+                        // if collectionView couldn't find cell by cellForItem(at:_),
+                        // should reload() in completion after animation.
+                        needsReload = true
+                    }
                 }
-            }
-            selectedDates = [date]
-            
-            // animate select cell
-            if let selectedCell = collectionView.cellForItem(at: indexPath) as? YMMonthDayCollectionCell {
-                selectedCell.select(withAnimation: selectAnimation) { _ in
-                    if needsReload {
-                        self.reload()
+                selectedDates = [date]
+                
+                // animate select cell
+                if let selectedCell = collectionView.cellForItem(at: indexPath) as? YMMonthDayCollectionCell {
+                    selectedCell.select(withAnimation: selectAnimation) { _ in
+                        if needsReload {
+                            self.reload()
+                        }
                     }
                 }
             }

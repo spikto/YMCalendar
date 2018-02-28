@@ -13,6 +13,7 @@ final internal class YMMonthDayCollectionCell: UICollectionViewCell, YMCollectio
     typealias YMMonthDayAnimationCompletion = (Bool) -> ()
     
     let dayLabel = UILabel()
+    let bgView = UIView()
     
     var dayLabelColor: UIColor = .black {
         didSet {
@@ -54,6 +55,12 @@ final internal class YMMonthDayCollectionCell: UICollectionViewCell, YMCollectio
     private func setup() {
         backgroundColor = .clear
         
+        bgView.backgroundColor = .clear
+        bgView.frame = CGRect(x:1,y:1,width:frame.width-2, height:frame.height-2)
+        bgView.clipsToBounds = true
+        bgView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        contentView.addSubview(bgView)
+        
         dayLabel.numberOfLines = 1
         dayLabel.adjustsFontSizeToFitWidth = true
         dayLabel.font = UIFont.systemFont(ofSize: 12.0)
@@ -78,6 +85,8 @@ final internal class YMMonthDayCollectionCell: UICollectionViewCell, YMCollectio
         }
         dayLabel.frame = CGRect(x: x, y: dayLabelMargin, width: dayLabelHeight, height: dayLabelHeight)
         dayLabel.layer.cornerRadius = dayLabelHeight / 2
+        
+        
     }
     
     public func select(withAnimation animation: YMSelectAnimation, completion: YMMonthDayAnimationCompletion? = nil) {
